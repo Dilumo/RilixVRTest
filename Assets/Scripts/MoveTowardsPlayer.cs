@@ -1,52 +1,73 @@
 using UnityEngine;
+using System.Collections;
 
 public class MoveTowardsPlayer : MonoBehaviour
 {
     [Header("Referências")]
-    [SerializeField] private Transform playerTransform; // Transform do jogador que o personagem irá seguir
-    [SerializeField] private Animator animator; // Referência ao Animator do personagem
+    [SerializeField] private Transform playerTransform;
+    [SerializeField] private Animator animator;
 
     [Header("Configurações de Movimento")]
-    [SerializeField] private float moveSpeed = 2f; // Velocidade de movimento
-    [Header("Configurações da animação")]
-    [SerializeField] private string stateMove = "Walk_Forward"; // Nome do state de movimento
-    [SerializeField] private string stateIdle = "idle"; // Nome do state de movimento
+    [SerializeField] private float moveSpeed = 2f;
+    [SerializeField] private float stopDistance = 1.5f;
 
-    private bool shouldMove = false;
+    [Header("Configurações de Animação")]
+    [SerializeField] private string stateMove = "Walk_Forward";
+    [SerializeField] private string stateIdle = "idle";
 
-    void Update()
+    private bool isMoving = false;
+
+    public void StartMovement()
     {
-        if (shouldMove && playerTransform != null)
+        if (!isMoving)
         {
-            // Calcula a direção para o jogador
+            isMoving = true;
+            StartCoroutine(MoveToPlayer());
+        }
+    }
+
+    public void StopMovement()
+    {
+        isMoving = false;
+
+        // Parar animação de movimento
+        if (animator != null)
+        {
+            animator.Play(stateIdle);
+        }
+
+        StopAllCoroutines();
+    }
+
+    private IEnumerator MoveToPlayer()
+    {
+        while (isMoving && playerTransform != null)
+        {
             Vector3 direction = playerTransform.position - transform.position;
-            direction.Normalize();
+            direction.y = 0;
 
-            // Move o personagem em direção ao jogador
-            transform.position += direction * moveSpeed * Time.deltaTime;
+            if (direction.magnitude <= stopDistance)
+            {
+                isMoving = false;
 
-            // Aplicar animação de andar
+                // Tocar animação de idle
+                if (animator != null)
+                {
+                    animator.Play(stateIdle);
+                }
+                yield break;
+            }
+
+            // Move o NPC
+            transform.position += direction.normalized * moveSpeed * Time.deltaTime;
+
+            // Tocar animação de movimento
             if (animator != null)
             {
                 animator.Play(stateMove);
             }
-        }
-        else if (animator != null)
-        {
-            // Parar animação de andar quando não estiver se movendo
-            animator.Play(stateIdle);
-        }
-    }
 
-    // Método para iniciar o movimento
-    public void StartMovement()
-    {
-        shouldMove = true;
-    }
-
-    // Método para parar o movimento
-    public void StopMovement()
-    {
-        shouldMove = false;
+            yield return null; // Espera até o próximo frame
+        }
     }
 }
