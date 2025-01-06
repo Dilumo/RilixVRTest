@@ -142,8 +142,6 @@ PlayerSettings:
   bundleVersion: 0.0
   preloadedAssets:
   - {fileID: 11400000, guid: 4d8a10e23cf56f2499a4d99e37bd195b, type: 2}
-  - {fileID: 11400000, guid: 057f9b5f4998dcb44ac73185f73b4cf0, type: 2}
-  - {fileID: -8772329446110560807, guid: 893a162a5bed82c4d9a050225e24136b, type: 2}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
   m_HolographicPauseOnTrackingLoss: 1
@@ -525,7 +523,7 @@ PlayerSettings:
     m_APIs: 10000000
     m_Automatic: 1
   - m_BuildTarget: AndroidPlayer
-    m_APIs: 150000000b000000
+    m_APIs: 0b000000
     m_Automatic: 0
   - m_BuildTarget: WindowsStandaloneSupport
     m_APIs: 02000000
