@@ -1,0 +1,2 @@
+D:\Repositories\Tests\Rilix\RilixVRTest\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\src\main\cpp\CMakeLists.txt
+D:\Repositories\Tests\Rilix\RilixVRTest\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\src\main\cpp\GameActivity\CMakeLists.txt
