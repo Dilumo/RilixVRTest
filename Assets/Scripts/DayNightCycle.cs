@@ -5,8 +5,8 @@ public class DayNightCycle : MonoBehaviour
 {
     [Header("Luz Direcional")]
     [SerializeField] private Light directionalLight;
-    [SerializeField] private Gradient nightToDayGradient; // Gradiente de noite para dia
-    [SerializeField] private Gradient dayToNightGradient; // Gradiente de dia para noite
+    [SerializeField] private Gradient nightToDayGradient;
+    [SerializeField] private Gradient dayToNightGradient;
 
     [Header("Skybox")]
     [SerializeField] private Material daySkybox;
@@ -18,32 +18,25 @@ public class DayNightCycle : MonoBehaviour
     [SerializeField] private AudioClip nightMusic;
 
     [Header("Ciclo de Tempo")]
-    [SerializeField] private float cycleDuration = 20f; // Duração total (dia ou noite)
+    [SerializeField] private float cycleDuration = 20f;
 
     private float timeCounter = 0f;
     private bool isDay = false;
 
     void Start()
     {
-        // Configura o estado inicial
-        SetCycleState(false); // Começa como noite
+        SetCycleState(false);
     }
 
     void Update()
     {
-        // Avança o contador de tempo
         timeCounter += Time.deltaTime;
 
-        // Normaliza o tempo (0 a 1) baseado no ciclo atual (dia ou noite)
         float normalizedTime = timeCounter / cycleDuration;
-
-        // Seleciona o gradiente correto
         Gradient currentGradient = isDay ? dayToNightGradient : nightToDayGradient;
 
-        // Atualiza a cor da luz de acordo com o gradiente atual
         directionalLight.color = currentGradient.Evaluate(normalizedTime);
 
-        // Troca o Skybox e reinicia o ciclo quando o tempo terminar
         if (timeCounter >= cycleDuration)
         {
             timeCounter = 0f;
@@ -53,14 +46,8 @@ public class DayNightCycle : MonoBehaviour
 
     private void SwitchCycle()
     {
-        // Alterna o estado do ciclo
         isDay = !isDay;
-
-        // Troca o Skybox
-        RenderSettings.skybox = isDay ? daySkybox : nightSkybox;
-        DynamicGI.UpdateEnvironment();
-
-        // Troca a música
+        StartCoroutine(TransitionSkybox(isDay ? daySkybox : nightSkybox, 2f)); // Transição suave
         audioSource.clip = isDay ? dayMusic : nightMusic;
         audioSource.Play();
     }
@@ -70,13 +57,30 @@ public class DayNightCycle : MonoBehaviour
         isDay = toDay;
         timeCounter = 0f;
 
-        // Configura estado inicial
         RenderSettings.skybox = toDay ? daySkybox : nightSkybox;
         directionalLight.color = (toDay ? dayToNightGradient : nightToDayGradient).Evaluate(0f);
         DynamicGI.UpdateEnvironment();
 
-        // Configura música inicial
         audioSource.clip = toDay ? dayMusic : nightMusic;
         audioSource.Play();
+    }
+
+    IEnumerator TransitionSkybox(Material targetSkybox, float duration)
+    {
+        Material currentSkybox = RenderSettings.skybox;
+        float timer = 0f;
+
+        while (timer < duration)
+        {
+            timer += Time.deltaTime;
+            float blend = timer / duration;
+
+            RenderSettings.skybox.SetFloat("_Exposure", Mathf.Lerp(currentSkybox.GetFloat("_Exposure"), targetSkybox.GetFloat("_Exposure"), blend));
+            DynamicGI.UpdateEnvironment();
+            yield return null;
+        }
+
+        RenderSettings.skybox = targetSkybox;
+        DynamicGI.UpdateEnvironment();
     }
 }
